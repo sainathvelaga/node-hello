@@ -1,11 +1,10 @@
-FROM node:alpine3.18 AS build
+FROM node:22 AS build-env
+COPY . /app
 WORKDIR /app
-COPY package.json ./
-COPY package-lock.json ./
-RUN npm install
 
-FROM node:alpine3.18
+RUN npm ci --omit=dev
+
+FROM gcr.io/distroless/nodejs22-debian12
+COPY --from=build-env /app /app
 WORKDIR /app
-COPY --from=build /app/ .
-EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["index.js"]
